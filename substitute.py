@@ -70,7 +70,6 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
         user_pattern_query = ""
         if matches.group(1):
             user_pattern_query = "AND username == '{}' ".format(matches.group(1))
-            offset += 1
 
         pattern = re.compile(matches.group(3))
         string = matches.group(4)
