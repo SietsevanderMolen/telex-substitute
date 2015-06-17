@@ -62,13 +62,15 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
     def substitute_message(self, msg, matches):
         chat_id = msg.dest.id
 
+        offset = 1
+        if matches.group(2):
+            offset =  int(matches.group(2)) * -1
+
+
         user_pattern_query = ""
         if matches.group(1):
             user_pattern_query = "AND username == '{}' ".format(matches.group(1))
-
-        offset = 0
-        if matches.group(2):
-            offset =  int(matches.group(2)) * -1
+            offset += 1
 
         pattern = re.compile(matches.group(3))
         string = matches.group(4)
@@ -86,4 +88,3 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
         peer = self.bot.get_peer_to_send(msg)
         txt = "{} FTFY".format(new_message)
         peer.send_msg(txt, reply=results[0]["msg_id"], preview=False)
-
