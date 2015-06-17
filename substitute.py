@@ -19,9 +19,9 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
 
     usage = [
         ":s/pattern/string: substitute pattern for string in the last message",
-        ":-1s/pattern/string: substitute pattern for string in the second to last message"
-        ":john,s/pattern/string: substitute pattern for string in the last message by john"
-        ":john,-1s/pattern/string: substitute pattern for string in the second to last message by john"
+        ":-1s/pattern/string: substitute pattern for string in the second to last message",
+        ":john,s/pattern/string: substitute pattern for string in the last message by john",
+        ":john,-1s/pattern/string: substitute pattern for string in the second to last message by john",
     ]
 
 
