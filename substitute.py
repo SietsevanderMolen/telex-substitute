@@ -1,6 +1,6 @@
 import tgl
 from telex.DatabaseMixin import DatabaseMixin, DbType
-from telex.utils.decorators import group_only
+from telex.utils.decorators import pm_only
 from functools import partial
 from telex import plugin
 from urllib.parse import quote
@@ -14,11 +14,12 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
     HISTORY_QUERY_SIZE = 1000
 
     patterns = {
-        "^:(.*)s\/(.+)\/(.+)$": "substitute"
+        "^:(-\d*){0,1}s\/(.+)\/(.*)$": "substitute_message"
     }
 
     usage = [
-        "s/pattern/string"
+        ":s/pattern/string: substitute pattern for string in the last message",
+        ":-1s/pattern/string: substitute pattern for string in the second to last message"
     ]
 
 
@@ -56,24 +57,25 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
                     name=name,
                     chat_id=msg.dest.id, message=msg.text)
 
-    def substitute(self, msg, matches):
+    @pm_only
+    def substitute_message(self, msg, matches):
         chat_id = msg.dest.id
-        username = matches.group(1)
+        offset = 1
+        if matches.group(1):
+            offset =  int(matches.group(1)) * -1
         pattern = re.compile(matches.group(2))
         string = matches.group(3)
 
-        if username:  # sub for person
-            query = """SELECT * FROM {0}
-                       WHERE username == ? AND chat_id == {1}
-                       ORDER BY timestamp DESC LIMIT 1 COLLATE NOCASE""".format(self.table_name, chat_id)
-            results = self.query(query, parameters=(username,))
-        else:  # sub general
-            query = """SELECT * FROM {0} WHERE chat_id == {1}
-                       ORDER BY timestamp DESC LIMIT 1 OFFSET 1 COLLATE NOCASE""".format(self.table_name, chat_id)
-            results = self.query(query)
+        query = """SELECT * FROM {0} WHERE chat_id == {1}
+                   ORDER BY timestamp DESC LIMIT 1 OFFSET {2} COLLATE NOCASE""".format(self.table_name, chat_id, offset)
+        self.query_and_sub(query, pattern, string, msg)
+
+    def query_and_sub(self, query, pattern, string, msg):
+        results = self.query(query)
 
         new_message = pattern.sub(string, results[0]["message"])
 
         peer = self.bot.get_peer_to_send(msg)
-        txt = "{}".format(new_message)
+        txt = "{} FTFY".format(new_message)
         peer.send_msg(txt, reply=results[0]["msg_id"], preview=False)
+
