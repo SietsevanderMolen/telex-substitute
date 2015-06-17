@@ -14,12 +14,14 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
     HISTORY_QUERY_SIZE = 1000
 
     patterns = {
-        "^:(-\d*){0,1}s\/(.+)\/(.*)$": "substitute_message"
+        "^:(?:(\w+?),){0,1}(-\d+){0,1}s\/(.*)\/(.+)$": "substitute_message"
     }
 
     usage = [
         ":s/pattern/string: substitute pattern for string in the last message",
         ":-1s/pattern/string: substitute pattern for string in the second to last message"
+        ":john,s/pattern/string: substitute pattern for string in the last message by john"
+        ":john,-1s/pattern/string: substitute pattern for string in the second to last message by john"
     ]
 
 
@@ -60,14 +62,21 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
     @pm_only
     def substitute_message(self, msg, matches):
         chat_id = msg.dest.id
-        offset = 1
-        if matches.group(1):
-            offset =  int(matches.group(1)) * -1
-        pattern = re.compile(matches.group(2))
-        string = matches.group(3)
 
-        query = """SELECT * FROM {0} WHERE chat_id == {1}
-                   ORDER BY timestamp DESC LIMIT 1 OFFSET {2} COLLATE NOCASE""".format(self.table_name, chat_id, offset)
+        user_pattern_query = ""
+        if matches.group(1):
+            user_pattern_query = "AND username == '{}' ".format(matches.group(1))
+
+        offset = 1
+        if matches.group(2):
+            offset =  int(matches.group(2)) * -1
+
+        pattern = re.compile(matches.group(3))
+        string = matches.group(4)
+
+        query = """SELECT * FROM {0} WHERE chat_id == {1} {2}
+                   ORDER BY timestamp DESC LIMIT 1 OFFSET {3} COLLATE NOCASE""".format(self.table_name, chat_id, user_pattern_query, offset)
+        print(query)
         self.query_and_sub(query, pattern, string, msg)
 
     def query_and_sub(self, query, pattern, string, msg):
