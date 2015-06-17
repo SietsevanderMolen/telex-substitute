@@ -59,7 +59,6 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
                     name=name,
                     chat_id=msg.dest.id, message=msg.text)
 
-    @pm_only
     def substitute_message(self, msg, matches):
         chat_id = msg.dest.id
 
