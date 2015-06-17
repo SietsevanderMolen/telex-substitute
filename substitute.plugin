@@ -1,0 +1,9 @@
+[Core]
+Name = Substitute
+Module = substitute
+
+[Documentation]
+Author = Sietse van der Molen
+Version = 1.0
+Website = https://github.com/sietsevandermolen/telex-substitute
+Description = run substitution regexes on messages

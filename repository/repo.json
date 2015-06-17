@@ -1,0 +1,9 @@
+{
+    "name": "Substitute",
+    "description": "Run substitution regexes on messages",
+    "version": "1.0",
+    "default_enable": ["Substitute"],
+    "homepage": "https://github.com/sietsevandermolen/telex-substitute",
+    "repo": "https://github.com/sietsevandermolen/telex-substitute.git",
+    "branch": "master"
+}
