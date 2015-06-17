@@ -66,7 +66,7 @@ class SubstitutePlugin(plugin.TelexPlugin, DatabaseMixin):
         if matches.group(1):
             user_pattern_query = "AND username == '{}' ".format(matches.group(1))
 
-        offset = 1
+        offset = 0
         if matches.group(2):
             offset =  int(matches.group(2)) * -1
 
